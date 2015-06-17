@@ -1,4 +1,4 @@
-// -*- compile-command: CXXFLAGS="-std=c++1y -Wall -O3" make -k main && ./main | sort -u; -*-
+// -*- compile-command: CXXFLAGS="-std=c++1y -Wall -O3" make -k main && ./main  -*-
 #include <string>
 #include <vector>
 #include <array>
@@ -9,6 +9,8 @@
 #include <fstream>
 #include <sstream>
 #include <set>
+#include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 class Trie;
@@ -32,7 +34,7 @@ public:
 	auto child = successor(str);
 	if (nullptr == child) {
 	    child = make_shared<Trie>();
-	    children[front(str) - 'a'] = child;
+	    children[front(str)] = child;
 	}
 	child->insert(str.substr(1));
     }
@@ -69,20 +71,19 @@ public:
 	std::string line;
 	size_t lines = 0;
 	while( getline(ifs, line) ) {
+	  transform(line.begin(), line.end(), line.begin(), ::tolower);
 	    root->insert(line);
 	    lines++;
 	}
     }
     
     bool isWord;
-    array<trie_ptr, 26> children;
-    trie_ptr operator[] (size_t idx) const {
-	assert(idx - 'a' >= 0 || ! printf("%d -> %d ( %c )\n", idx, idx - 'a', idx));
-	assert(idx - 'a' < 26 || ! printf("%d -> %d ( %c )\n", idx, idx - 'a', idx));
-	return children[idx - 'a']; };
-
+  unordered_map<char, trie_ptr> children;
   trie_ptr operator[] (char c) const {
-    return (*this)[static_cast<size_t>(c)];
+    auto child = children.find(c);
+    if ( child == children.end() )
+      return nullptr;
+    return child->second;
   }
     static trie_ptr root;
 };
@@ -98,6 +99,10 @@ void search(trie_ptr t, const multiset<char> letters, std::string res) {
   if (0 == letters.size()) {
     if (t->isWord)
       results.emplace(res);
+    if (0 == (results.size() % 100) ){
+      cout << ".";
+      flush(cout);
+    }
     return;
   }
 
@@ -115,19 +120,29 @@ void search(trie_ptr t, const multiset<char> letters, std::string res) {
   }
 }
 
-int main(int argc, char **) {
+int main(int argc, char *argv[]) {
 
+    Trie::loadDictonary("out.txt");
+    string input("");
+    if (argc > 1) {
+      for(int i = 1; i < argc; i++) {
+	input += argv[i];
+      }
+    } else {
+      input = "Jacob Pedersen";
+    }
+    transform(input.begin(), input.end(), input.begin(), ::tolower);
+    
     chrono::time_point<chrono::system_clock> start, lap, end;
     start = chrono::system_clock::now();
 
-    Trie::loadDictonary("words.txt");
 
     lap = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = lap-start;
-    cout << "finished reading dictionay  in " << elapsed_seconds.count() << "s" << endl;
+    cout << "finished reading dictionary in " << elapsed_seconds.count() << "s" << endl;
     
     auto letters = multiset<char>();
-    for (auto c : "anette heick") {
+    for (auto c : input) {
       if (isalpha(c))
 	letters.emplace(c);
     }

@@ -1,2 +1,10 @@
 a simple anagram maker
 
+ordliste fra [[http://www.dsn.dk/retskrivning/ro-elektronisk-og-som-bog/distribution#ordlister]]
+
+Den må sikkert ikks distribueres, men hent den og rens den med 
+python3.4 cleanwords.py ordbog.txt 
+
+results depends on the quality of the wordlists.
+
+The algorithm is inefficient as it does generate the same words again and again. perhaps maintaining a set of used words could enable early termination
