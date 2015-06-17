@@ -1,4 +1,4 @@
-// -*- compile-command: CXXFLAGS="-std=c++1y -Wall -O3" make -k main && ./main; -*-
+// -*- compile-command: CXXFLAGS="-std=c++1y -Wall -O3" make -k main && ./main | sort -u; -*-
 #include <string>
 #include <vector>
 #include <array>
@@ -92,10 +92,12 @@ void lookup(const Trie& root, string word) {
     cout << word << (root.find(word.c_str()) ? " was " : " was not " ) << "in the Trie" <<endl;
 }
 
+set<string> results;
+
 void search(trie_ptr t, const multiset<char> letters, std::string res) {
   if (0 == letters.size()) {
     if (t->isWord)
-      cout << res << endl;
+      results.emplace(res);
     return;
   }
 
@@ -115,28 +117,26 @@ void search(trie_ptr t, const multiset<char> letters, std::string res) {
 
 int main(int argc, char **) {
 
-    std::chrono::time_point<std::chrono::system_clock> start, lap, end;
-    start = std::chrono::system_clock::now();
+    chrono::time_point<chrono::system_clock> start, lap, end;
+    start = chrono::system_clock::now();
 
     Trie::loadDictonary("words.txt");
 
-    lap = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = lap-start;
-    std::cout << "finished reading dictionay  in " << elapsed_seconds.count() << "s\n";
+    lap = chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = lap-start;
+    cout << "finished reading dictionay  in " << elapsed_seconds.count() << "s" << endl;
     
     auto letters = multiset<char>();
     for (auto c : "anette heick") {
       if (isalpha(c))
 	letters.emplace(c);
     }
-    for (auto l : letters)
-      cout << "The letter " << l << endl;
     search(Trie::root, letters, "");
-
     end = std::chrono::system_clock::now();
     elapsed_seconds = end-lap;
-    std::cout << "found a solution in " << elapsed_seconds.count() << "s\n";
-    
+    cout << "found all " << results.size() << " solutions in " << elapsed_seconds.count() << "s" << endl;
+    for (auto s : results)
+      cout << s << endl;
     return 0;
 }
 
