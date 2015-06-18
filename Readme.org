@@ -1,14 +1,14 @@
 Simple anagram makers
 
-results depends on the quality of the wordlists.
+results depends on the quality of the word lists.
 
 
-I have implemtend two algoritms:
-* Trie based exhausitve search
+I have implemented two algorithms:
+* Trie based exhaustive search
   [[triebased.cc]]
-  Starts by reading a wordlist into a Trie
+  Starts by reading a word list into a Trie
 
-  The it performs an exhausitive search in the trie
+  The it performs an exhaustive search in the Trie
   #+BEGIN_SRC c++
   void search(trie_ptr t, const multiset<char> letters, std::string res) {
   if (0 == letters.size()) {
@@ -31,8 +31,8 @@ I have implemtend two algoritms:
   #+END_SRC
 
   The algorithm is inefficient as it does generate the same words
-  again and again. Furher the inner loop wil actually look at the same
-  letter mulitple times. Once for each occurence in the input string
+  again and again. Further the inner loop Will actually look at the same
+  letter multiple times. Once for each occurrence in the input string
 
   Although inefficient it works and is easy to work implement.
 
@@ -40,9 +40,9 @@ I have implemtend two algoritms:
   [[hashagram.cc]]
 
   This time the dictionary is a =unordered_multimap= where the keys
-  are sorted lowercased versions of the words. This enables $O(1)$
-  lookups for anagrams, simply create a key for the word at hand and
-  then make a lookup in the dictionary.
+  are sorted lower-cased versions of the words. This enables $O(1)$
+  look-ups for anagrams, simply create a key for the word at hand and
+  then make a look-up in the dictionary.
 
   In order to find all possible anagrams each word is divided in to
   all possible prefix/suffix combinations, and if there are anagrams
@@ -77,7 +77,7 @@ I have implemtend two algoritms:
 }
   #+END_SRC
   
-* Wordlists
+* Word lists
 
 ** danish words:
    ordliste fra [[http://www.dsn.dk/retskrivning/ro-elektronisk-og-som-bog/distribution#ordlister]]
