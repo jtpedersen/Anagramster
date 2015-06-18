@@ -1,10 +1,86 @@
-a simple anagram maker
-
-ordliste fra [[http://www.dsn.dk/retskrivning/ro-elektronisk-og-som-bog/distribution#ordlister]]
-
-Den må sikkert ikks distribueres, men hent den og rens den med 
-python3.4 cleanwords.py ordbog.txt 
+Simple anagram makers
 
 results depends on the quality of the wordlists.
 
-The algorithm is inefficient as it does generate the same words again and again. perhaps maintaining a set of used words could enable early termination
+
+I have implemtend two algoritms:
+* Trie based exhausitve search
+  [[triebased.cc]]
+  Starts by reading a wordlist into a Trie
+
+  The it performs an exhausitive search in the trie
+  #+BEGIN_SRC c++
+  void search(trie_ptr t, const multiset<char> letters, std::string res) {
+  if (0 == letters.size()) {
+    if (t->isWord)
+      results.emplace(res);
+    return;
+  }
+  for (auto letter: letters) {
+    auto tp = (*t)[letter];
+    if (tp) {
+      auto tmp = multiset<char>(letters);
+      tmp.erase(tmp.find(letter));
+      search(tp, tmp, res + letter);
+    }
+  }
+  if (t->isWord) {
+    search(Trie::root, letters, res + " ");
+  }
+}
+  #+END_SRC
+
+  The algorithm is inefficient as it does generate the same words
+  again and again. Furher the inner loop wil actually look at the same
+  letter mulitple times. Once for each occurence in the input string
+
+  Although inefficient it works and is easy to work implement.
+
+* Hash based
+  [[hashagram.cc]]
+
+  This time the dictionary is a =unordered_multimap= where the keys
+  are sorted lowercased versions of the words. This enables $O(1)$
+  lookups for anagrams, simply create a key for the word at hand and
+  then make a lookup in the dictionary.
+
+  In order to find all possible anagrams each word is divided in to
+  all possible prefix/suffix combinations, and if there are anagrams
+  for both there all permutations are added to the results.
+
+  Finally all calculations are /memoized/ to avoid recalculating anagrams.
+
+  #+BEGIN_SRC c++
+  set<string> findAnagrams(string word) {
+  auto key = createKey(word);
+  if (memotable.find(key) != memotable.end())
+    return memotable[key];
+  // cout << "findAnagrams for : " << word << endl;
+  set<string> results;
+  auto range = dictionary.equal_range(key);
+  for (auto it = range.first; it != range.second; ++it) {
+      results.emplace(it->second);
+  }
+  
+  // recurse!
+  for(unsigned int i = 1; i < word.size(); i++) {
+    auto prefixes = findAnagrams(word.substr(0,i));
+    auto suffixes = findAnagrams(word.substr(i));
+    if ( ! (prefixes.empty() && suffixes.empty()) ) {
+      auto perms = permutations(prefixes, suffixes);
+      for(auto p : perms)
+	results.emplace(p);
+    }
+  }
+  memotable.emplace(make_pair(key, results));
+  return results;
+}
+  #+END_SRC
+  
+* Wordlists
+
+** danish words:
+   ordliste fra [[http://www.dsn.dk/retskrivning/ro-elektronisk-og-som-bog/distribution#ordlister]]
+
+   Den må sikkert ikks distribueres, men hent den og rens den med 
+   python3.4 cleanwords.py ordbog.txt 

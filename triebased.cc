@@ -115,9 +115,9 @@ void search(trie_ptr t, const multiset<char> letters, std::string res) {
     }
   }
   
-  // if (t->isWord) {
-  //   search(Trie::root, letters, res + " ");
-  // }
+  if (t->isWord) {
+    search(Trie::root, letters, res + " ");
+  }
 }
 
 int main(int argc, char *argv[]) {
